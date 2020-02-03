@@ -11,26 +11,90 @@
 // Global JSON for word occurnce from dictionary
 var dictionary = {};
 
-/* Functions */
+/*****  Functions *****/
 
-// Adds a word to dictionary
+// Add word to dictionary
 function recordWord(word){
 
+    // Check if word is not in dictionary, add it with initialzer
+    if(!dictionary[word]){
+        dictionary[word] = 0;
+    }
+
+    // When word is in dictionary, add the 1 occurence
+    dictionary[word] += 1;
 }
 
 // Trim blank spaces as necesary
 function cleanWord(word){
+
+    // Remove space, convert to lowercase
+    word = word.trim().toLowerCase();
+    let wordFinal = "";
+
+    // Check each char to see it is a char, remove non-letters
+    for(let i = 0; i < word.length; i++){
+        // Between letters a - z
+        if(word[i] >= 'a' && word[i] <= 'z'){
+            wordFinal += word[i];
+        }
+    }
+
+    return wordFinal;
 
 }
 
 // Process entire text line of data, add words to global dictionary via recordWord
 function process(data, and_update){
 
+    // To process strings of text
+    let  items = data.split(" ");
+
+    // Loop through each word
+    for(let i = 0; i < items.length; i++){
+
+        // Invoke the trim of blank space based in loop
+        let cleaned = cleanWord(items[i]);
+
+        // Ignore the blanks
+        if(cleaned != ""){
+            if(and_update == false){
+                recordWord(cleaned);
+            }
+            // Otherwise look up count in dictionary and replace
+            else{
+                // 1 existing occurence
+                if(dictionary[cleaned] > 1){
+                    items[i] = dictionary[cleaned];
+                }
+            }
+        }
+    }
+
+    return items.join(" ");
 }
 
 // Process text elements and recursively call each child elements
 function recurseThrough(element, and_update){
 
+    // loop through text elements
+    for(let i = 0; i < element.childNodes.length; i++){
+
+        // check if it's text, then process
+        if(element.childNodes[i].nodeName == "#text"){
+
+            //pass element.childNodes[i].data to a fucntion that breaks it into indiviaul words, checks if a word is relevant/valid (not in illegalWords var)
+            // if it's a word we want to consider, pass to yet another function that records it into some sort of data structure which will count its occurrences
+            let processed = process(element.childNodes[i].data, and_update);
+            element.childNodes[i].data = processed;
+
+        }
+        // Otherwise not text, keep recursing to find out
+        else{
+            // Recursion
+            recurseThrough(element.childNodes[i], and_update);
+        }
+    }
 }
 
 // Create Asynch Function to get most commmon words from wiki API
