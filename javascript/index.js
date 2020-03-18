@@ -106,6 +106,14 @@ const readMostCommonWords = async () => {
     // Begin to fetch most common words
     try{
 
+        const resp = await fetch(mostCommonWordsURL, {});
+
+        // Read body to build string
+        const reader = resp.body.getReader();
+
+        let respBody = "";
+        let done = false;
+
     }
 
     catch(err){
