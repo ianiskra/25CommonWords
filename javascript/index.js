@@ -114,6 +114,34 @@ const readMostCommonWords = async () => {
         let respBody = "";
         let done = false;
 
+        do{
+            // Asynchronously read from result
+            const obj = await reader.read();
+            const value = obj.value;
+            done = obj.done;
+            // Access the text encoding
+            const chunckStr = new TextDecoder("utf-8").decode(value);
+            respBody += chunckStr;
+        }
+
+        // keep reading from reader until done
+        while(!done);
+
+        // Split on <tr> tags to make a list of rows (skipping first 2 items, the table header and the table tag)
+        let table_rows = respBody.split('&lt;tr&gt').slice(2);
+        let most_common_words = [];
+
+
+        // for each row (which contians a word), need to extract the word from teh link: <a href="https://en.wikitionary.org/wiki/The#English"></td>
+        // first split by #english and take the first item, yields: <a href="https://en.wikionary.org/wiki/The"
+        // then split on the URL link and take the 2nd item, produing: "The", which gets pushed to the most_common_words list
+
+        // loop through table rows
+        for(let i = 0; i < table_rows.length - 1; i++){
+            most_common_words.push(table_rows[i].split('#Englilsh')[0].split(';https://en.wiktionary.org/wiki/')[1]);
+        }
+        return most_common_words;
+
     }
 
     catch(err){
